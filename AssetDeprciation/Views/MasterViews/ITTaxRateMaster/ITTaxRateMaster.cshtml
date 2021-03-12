@@ -1,0 +1,107 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "ITTaxRateMaster";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        $("#ddlGroup").change(function () {
+            $("#ddlSubGroup").prop("disabled", false);
+            $.ajax({
+                url: '/ITTaxRateMaster/GetSubgrouplist',
+                type: 'POST',
+                dataType: 'json',
+                data: { GroupCode: $("#ddlGroup option:selected").val() },
+                success: function (data) {
+                    $("#ddlSubGroup").html("");
+                    $("#ddlSubGroup").prop("disabled", false);
+                    $("#ddlSubGroup").append("<option value=''>Select Sub Group</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $("#ddlSubGroup").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                    }
+                }
+            });
+        });
+
+
+        $("#ddlSubGroup").change(function () {
+            $.ajax({
+                url: '/ITTaxRateMaster/GetSubgroupShift',
+                type: 'POST',
+                dataType: 'json',
+                data: { SubGroupCode: $("#ddlSubGroup option:selected").val() },
+                success: function (data) {
+                    $("#SubGroupShift").val(data);
+
+                }
+
+            });
+
+
+            $("#ITTaxRateForm").validate();
+            $("#ddlGroup").rules("add", { required: true, messages: { required: "Select Group" } });
+            $("#ddlSubGroup").rules("add", { required: true, messages: { required: "Select SubGroup" } });
+            $("#ITDepRate").rules("add", { required: true, messages: { required: "Enter Depreciation Rate" } });
+
+        });
+    });
+</script>
+
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+    </style>
+<br />
+<br />
+@using (Html.BeginForm("ITTaxRateMaster", "ITTaxRateMaster", FormMethod.Post, new { @id="ITTaxRateForm"}))
+{
+    <h1>IT Tax Rate</h1>
+    <table>
+        <tr>
+            <td>Group Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Group.GroupCode, Model.DropDownViewModel.GroupList, "Select Group", new { @id = "ddlGroup" })</td>
+        </tr>
+        <tr>
+            <td>SubGroup Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubGroup", @disabled = true })</td>
+        </tr>
+
+        <tr>
+            <td>Shift</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_ShiftCode, Model.DropDownViewModel.ShiftList, "Select Shift", new { @id = "SubGroupShift" })</td>
+        </tr>
+
+        <tr>
+            <td>Depreciation Rate</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_CompanyActRate.Rate, new { @id="ITDepRate"})</td>
+        </tr>
+
+        <tr>
+            <td>
+                Financial Year
+            </td>
+            <td>
+           @Html.DropDownListFor(x => x.FinancialYearMasterModel.FinYear, Model.DropDownViewModel.FinancialYearList)
+            </td>
+        </tr>
+        <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+}
+

@@ -1,0 +1,231 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "AssetEditInfo";
+}
+<style>
+    .myButton {
+        background-color: #424242;
+        border: 1px solid #424242;
+        border-radius: 4px;
+        box-shadow: 0 12px 7px -7px #000000;
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        font-family: Arial;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 8px 30px;
+        text-decoration: none;
+        text-shadow: 0 1px 0 #5b8a3c;
+        vertical-align: middle;
+    }
+        .myButton:hover {
+            background-color: #424242;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+
+        .myButton:active {
+            position: relative;
+            top: 1px;
+        }
+
+    ul.tabs {
+        margin: 0;
+        padding: 0;
+        float: left;
+        list-style: none;
+        height: 32px;
+        border-bottom: 1px solid #333;
+        width: 100%;
+    }
+
+        ul.tabs li {
+            float: left;
+            margin: 0;
+            cursor: pointer;
+            padding: 0px 21px;
+            height: 31px;
+            line-height: 31px;
+            border-top: 1px solid #333;
+            border-left: 1px solid #333;
+            border-bottom: 1px solid #333;
+            background-color: #666;
+            color: #ccc;
+            overflow: hidden;
+            position: relative;
+        }
+
+    .tab_last {
+        border-right: 1px solid #333;
+    }
+
+    ul.tabs li:hover {
+        background-color: #ccc;
+        color: #333;
+    }
+
+    ul.tabs li.active {
+        background-color: #fff;
+        color: #333;
+        border-bottom: 1px solid #fff;
+        display: block;
+    }
+
+    .tab_container {
+        border: 1px solid #333;
+        border-top: none;
+        clear: both;
+        float: left;
+        width: 100%;
+        background: #fff;
+        overflow: auto;
+    }
+
+    .tab_content {
+        padding: 20px;
+        display: none;
+    }
+
+    .tab_drawer_heading {
+        display: none;
+    }
+
+
+        .tab_drawer_heading {
+            background-color: #ccc;
+            color: #fff;
+            border-top: 1px solid #333;
+            margin: 0;
+            padding: 5px 20px;
+            display: block;
+            cursor: pointer;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .d_active {
+            background-color: #666;
+            color: #fff;
+        }
+</style>
+
+<script>
+    $(document).ready(function () {
+        // tabbed content
+        $("#btnUpdate").hide();
+        $(".tab_content").hide();
+        $(".tab_content:first").show();
+
+        $(".btnNext").click(function () {
+            $(".tab_content").hide();
+            $(this).parents().find("ul > li.active").removeAttr('id');
+            var newActive = $(this).parents().find("ul > li.active").next("li").attr("rel");
+            $(this).parents().find("ul > li.active").next("li").attr('id', 'current');
+            $("#" + newActive).fadeIn();
+            $(this).parents().find("ul.tabs li").removeClass("active");
+            $("#current").addClass("active");
+            $(".tab_drawer_heading").removeClass("d_active");
+            $(".tab_drawer_heading[rel^='" + newActive + "']").addClass("d_active");
+            if ($(this).parents().find("ul > li.active").hasClass("tab_last"))
+            {
+                $("#btnUpdate").show();
+            }
+            else
+            {
+                $("#btnUpdate").hide();
+            }
+           
+        });
+
+        $(".btnPrevious").click(function () {
+            $(".tab_content").hide();
+            $(this).parents().find("ul > li.active").removeAttr('id');
+            var newActive = $(this).parents().find("ul > li.active").prev("li").attr("rel");
+            $(this).parents().find("ul > li.active").prev("li").attr('id', 'current');
+            $("#" + newActive).fadeIn();
+            $(this).parents().find("ul.tabs li").removeClass("active");
+            $("#current").addClass("active");
+            $(".tab_drawer_heading").removeClass("d_active");
+            $(".tab_drawer_heading[rel^='" + newActive + "']").addClass("d_active");
+            if ($(this).parents().find("ul > li.active").hasClass("tab_last")) {
+                $("#btnUpdate").show();
+            }
+            else {
+                $("#btnUpdate").hide();
+            }
+        });
+
+
+
+
+
+        /* if in tab mode */
+        //$("ul.tabs li").click(function () {
+
+        //    $(".tab_content").hide();
+        //    var activeTab = $(this).attr("rel");
+        //    $("#" + activeTab).fadeIn();
+
+        //    $("ul.tabs li").removeClass("active");
+        //    $(this).addClass("active");
+
+        //    $(".tab_drawer_heading").removeClass("d_active");
+        //    $(".tab_drawer_heading[rel^='" + activeTab + "']").addClass("d_active");
+
+        //});
+
+        /* Extra class "tab_last"
+           to add border to right side
+           of last tab */
+        $('ul.tabs li').last().addClass("tab_last");
+    }); 
+</script>
+@using (Html.BeginForm("UpdateAssetInfo", "AssetAcquisition", FormMethod.Post))
+{
+    <br />
+<br/>
+<div class="container">
+    <h1>Asset Edit Info</h1>
+    <ul class="tabs">
+        <li class="active form-group-sm" rel="AssetInfo">Asset Info</li>
+        @*<li rel="AssetCost"class="form-group-sm">Asset Cost</li>*@
+        <li rel="AssetDepreciation" class="form-group-sm">Asset Depreciation</li>
+        <li rel="AdditionalInfo" class="form-group-sm">Additional Info</li>
+    </ul>
+    <div class="tab_container">
+
+        <div class="tab_content" id="AssetInfo" style="display: none;">
+         @{Html.RenderPartial("~/Views/AssetAcquisition/_AssetBasicInfo.cshtml");}   
+            <a class="myButton btnNext">Next</a>
+                </div>
+        <!-- #tab1 -->
+        @*<div class="tab_content" id="AssetCost" style="display: none;">
+            <h2>Asset Cost</h2>
+            <p>Nunc dui velit, scelerisque eu placerat volutpat, dapibus eu nisi. Vivamus eleifend vestibulum odio non vulputate.</p>
+        </div>*@
+        <!-- #tab2 -->
+        <div class="tab_content" id="AssetDepreciation" style="display: none;">
+            <h2>Asset Depreciation</h2>
+            @{Html.RenderPartial("~/Views/AssetAcquisition/_AssetDepreciationInfo.cshtml");}
+            <a class="myButton btnNext">Next</a>
+            <a class="myButton btnPrevious">Previous</a>
+        </div>
+        <!-- #tab3 -->
+        <div class="tab_content" id="AdditionalInfo" style="display: block;">
+            @{Html.RenderPartial("~/Views/AssetAcquisition/_AssetAdditionalInfo.cshtml");}
+            <a class="myButton btnPrevious">Previous</a>
+        </div>
+        <!-- #tab4 -->
+    </div>
+
+    <div>
+        
+        <input type="submit" class=" btn btn-primary" style="margin: 2% 0 0 90%" id="btnUpdate" value="update" />
+    </div>
+</div>
+}

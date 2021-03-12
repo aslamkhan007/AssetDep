@@ -1,0 +1,118 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+
+@{
+    ViewBag.Title = "UnitMaster";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+
+        //-----------------On Selection of Company------------------------------//
+        $("#ddlCompany").change(function () {
+
+            $("#DeleteMaster").jtable({
+                paging: true,
+                pageSize: 10,
+                sorting: true, //Enable sorting
+                defaultSorting: 'UnitName ASC',
+                selecting: true, //Enable selecting
+                selectingCheckboxes: true, //Show checkboxes on first column
+                multiselect: true,
+                //selectOnRowClick: false, //Enable this to only select using checkboxes
+                actions: {
+                    listAction: '/UnitMaster/UnitList',
+                    //deleteAction: '/UnitMaster/UnitDelete'
+                    deleteAction: function (postData) {
+                        console.log("deleting from custom function...");
+                        return $.Deferred(function ($dfd) {
+                            $.ajax({
+                                url: '/UnitMaster/UnitDelete',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: { UnitCode: postData.UnitCode, CompanyCode: $("#ddlCompany").val() },
+                                success: function (data) {
+                                    $dfd.resolve(data);
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                },
+                fields: {
+                    UnitCode: {
+                        key: true,
+                        create: false,
+                        edit: false,
+                        list: false
+                    },
+                    UnitName: {
+                        title: 'Unit Name',
+                        width: '12%'
+                    }
+                },
+
+            });
+            $('#DeleteMaster').jtable('load', {CompanyCode: $("#ddlCompany").val() });
+
+        });
+        
+
+        
+        $("#DeleteAllButton").on('click', function () {
+
+            if (confirm("These Selected records will be deleted. Are you sure??")) {
+                var $selectedRows = $('#deleteMaster').jtable('selectedRows');
+                $('#deleteMaster').jtable('deleteRows', $selectedRows);
+            }
+            return false;
+
+
+        });
+
+        //-----------------------------------------------------//
+        $("#UnitForm").validate();
+        $("#UnitName").rules("add", { required: true, messages: { required: "Enter Unit Name" } });
+        $("#ddlCompany").rules("add", { required: true, messages: { required: "Select Company" } });
+    });
+</script>
+<br /><br />
+@using (Html.BeginForm("UnitMaster", "UnitMaster", FormMethod.Post, new { @id="UnitForm"}))
+{
+    <h1>Unit Master</h1>
+    <table>
+        <tr>
+            <td>Company Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Company.CompanyCode, Model.DropDownViewModel.CompanyList, "Select Company", new { @id="ddlCompany"})</td>
+        </tr>
+        <tr>
+            <td>Unit Name</td>            
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Unit.UnitName, new { @id="UnitName"})</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+    <div id="DeleteMaster"></div>
+}

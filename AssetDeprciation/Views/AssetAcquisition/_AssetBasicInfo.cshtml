@@ -1,0 +1,128 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+
+
+@*<script src="~/Scripts/jquery-ui-1.10.2.js"></script>*@
+<script src="~/Scripts/jquery-ui-1.9.2.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+@*<link href="~/Content/jQuery%20UI-1.10.3.css" rel="stylesheet" />*@
+<script src="~/Scripts/jquery.validate.js"></script>
+
+
+
+<script>
+    $(document).ready(function () {    
+
+        $("#PutInUseDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+
+        $("#Assetrelation").change(function () {
+            if ($(this).val() === "Dependent-Child") {
+                $.ajax({
+                    url: '/AssetAcquisition/AssetChildEditInfo',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { AssetCode: $("#AssetCode").val() },
+                    success: function (data) {
+
+                        //$("#ddlSection").html("");
+                        //$("#ddlSection").append("<option value=''>Select Sub Group</option>");
+                        //for (var i = 0; i < data.length; i++) {
+                        //    $("#ddlSection").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                        //}
+                    }
+
+                });
+            }
+
+        });
+
+    });
+
+
+  
+
+</script>
+
+<table>
+    <tr>
+        <td colspan="2"><h2>Acquisition Details</h2></td>
+
+        <td></td>
+        <td colspan="2"><h2>Asset Details</h2></td>
+    </tr>
+    <tr>
+        <td>Acquired Type</td>
+        <td>
+      @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.AcquiredAs, new List<SelectListItem> { 
+     new SelectListItem {Text="Purchased",Value="Purchased"},
+     new SelectListItem {Text="Shifted In",Value="Shifted"}
+       })
+        </td>
+        <td></td>
+        <td>Asset Code</td>
+        <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.AssetCode, new {@id = "AssetCode" })</td>
+    </tr>
+    <tr>       
+        <td>Acquired Sub Type</td>
+        <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.AcquiredType, new List<SelectListItem> { 
+              new SelectListItem {Text="Independent",Value="Independent"},
+               new SelectListItem {Text="Independent-Child",Value="Independent-Child"},
+               new SelectListItem {Text="Dependent-Child",Value="Dependent-Child"},
+              
+       }, new { @id = "Assetrelation" })
+        </td>
+        <td></td>
+        <td>Asset Name</td>
+        <td>@Html.TextBoxFor(x=>x.Jct_Asset_Dep_Asset.AssetName)</td>
+    </tr>
+    <tr>
+        <td colspan="2"><h2>Purchase Details</h2></td>
+        <td></td>
+        <td>Physical ID</td>
+        <td>@Html.TextBoxFor(X=>X.Jct_Asset_Dep_Asset.AssetCode)</td>
+    </tr>
+    <tr>
+        <td>Quantity</td>
+        <td>@Html.TextBoxFor(x=>x.Jct_Asset_Dep_Asset.Quantity)</td>
+        <td></td>
+        <td>Company</td>
+        <td>
+             @Html.DropDownListFor(x=>x.Jct_Asset_Dep_Asset.CompanyCode,Model.DropDownViewModel.CompanyList)
+        </td>
+    </tr>
+
+    <tr>
+        <td>unit</td>
+        <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.UnitCode, Model.DropDownViewModel.UnitList)</td>
+        <td></td>
+        <td>Sub Unit</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubUnitCode, Model.DropDownViewModel.SubUnitList)
+        </td>
+    </tr>
+    <tr>
+        <td>Date Put To Use</td>               
+        <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Put_In_Use_Date, new { @id = "PutInUseDate" })</td>
+        <td></td>
+        <td>Section</td>
+        <td>
+            @Html.DropDownListFor(x=>x.Jct_Asset_Dep_Asset.SectionCode,Model.DropDownViewModel.SectionList)
+        </td>
+    </tr>
+    <tr>
+        <td>Sub Area</td>
+        <td>@Html.TextBoxFor(X=>X.Jct_Asset_Dep_Asset.SubArea)</td>
+        <td></td>
+        <td>Sub Section</td>
+        <td>
+           @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubSectionCode, Model.DropDownViewModel.SubSectionList)
+        </td>
+    </tr>
+    <tr>
+        <td>Remarks</td>
+        <td>@Html.TextAreaFor(x=>x.Jct_Asset_Dep_Asset.Remarks)</td>
+    </tr>
+</table>

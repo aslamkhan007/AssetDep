@@ -1,0 +1,259 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+
+<style>
+    input[readonly] {
+        background-color: #F0F0F0 !important;
+        color: #303030 !important;
+    }
+</style>
+<script>
+
+    //G123
+    $(document).ready(function () {
+
+        $("#txtyear").change(function () {
+
+            $("#cmpnyLife").val($("#txtyear").val() * 12);
+
+        });
+        $("#txtyear").val($("#cmpnyLife").val() / 12);
+        //----------Global Variable for retaining the value of asset life in case user decides to not to change life value--------------//
+        var previousValue = '@Model.Jct_Asset_Dep_Asset.Asset_Life';
+        //----------------------------------------------------------//
+        //-------------For calculating asset days of life---------//
+        var difference = new moment('@Model.Jct_Asset_Dep_Asset.Put_In_Use_Date');
+        var future = new moment('@Model.Jct_Asset_Dep_Asset.Effe_To');
+        $(".LifeDays").val(future.diff(difference, 'days'));
+        $(".LifeDays").val(future.diff(difference, 'days'));
+        //---------------------------------------------------//
+        //------------------For getting group asset life in case the user changes group-------//
+        $("#ddlGrp").change(function () {
+            $("#ddlSubGrp").html("");
+            $.ajax({
+                url: '/AssetAcquisition/getDetailsForGroup',
+                dataType: 'json',
+                type: 'POST',
+                data: { grpCode: $("#ddlGrp option:selected").val() },
+                success: function (result) {
+                    $("#cmpnyLife").val(result.Jct_Asset_Dep_Group.Group_Life);
+                    previousValue = $("#cmpnyLife").val();//global variable initialized
+                    if ($("#cmpnyLife").val() >= 12) {
+                        var LifeYears = $("#cmpnyLife").val() / 12;
+                        var rate = 95 / LifeYears;
+                    }
+                    else {
+                        var rate = 95 / $("#cmpnyLife").val();
+                    }
+                    $("#CompanyDepRate").val(rate.toFixed(2));
+                    //-----------------dropdown Bind------------//
+                    $("#ddlSubGrp").append("<option value=''>Select Category</option>");
+                    for (var i = 0; i < result.DropDownViewModel.SubGroupList.length; i++) {
+                        $("#ddlSubGrp").append($("<option></option>").val(result.DropDownViewModel.SubGroupList[i].Value).html(result.DropDownViewModel.SubGroupList[i].Text));
+                    }
+                }
+
+            });
+
+        });
+        //-------------------------------------------------------//
+
+        //------------changes in values after the life of asset is overrided-------------//
+        $("#txtyear").on('focusout', function () {
+
+            if (parseInt($("#cmpnyLife").val()) >= 12) {
+                var LifeYears = $("#cmpnyLife").val() / 12;
+                var rate = 95 / LifeYears;
+            }
+            else {
+                var rate = 95 / $("#cmpnyLife").val();
+            }
+
+            $("#CompanyDepRate").val(rate.toFixed(2));
+
+            var date = new Date('@Model.Jct_Asset_Dep_Asset.Effe_From');
+            var sum = parseInt(date.getMonth()) + parseInt($(this).val());
+            date.setMonth(sum);
+            $(".LifeEnd").val(date.toLocaleDateString());
+            var difference = new moment('@Model.Jct_Asset_Dep_Asset.Effe_From');
+
+            var future = new moment($(".LifeEnd").val());
+            $(".LifeDays").val(future.diff(difference, 'days'));
+
+        });
+        //--------------------------------------------------//
+
+        //-------------------------Override funcionality------------//
+        $("#Override").click(function () {
+            $("#txtyear").val($("#cmpnyLife").val() / 12);
+
+            if ($(this).prop("checked")) {
+                $("#txtyear").attr("readonly", false);
+            }
+            else {
+               // $("#txtyear").val(previousValue);
+                $("#txtyear").attr("readonly", true);
+            }
+
+        });
+        //-----------------------------------------------------//
+
+
+        //------------------fetch rate on change of Dep Method ---------------//
+        $("#DepMethod").change(function(){
+            $.ajax({
+                url: '/AssetAcquisition/fetchRateForNewMethod',
+                dataType: 'json',
+                type:'POST',
+                data: { MethodCode: $("#DepMethod option:selected").val(), GroupCode: $("#ddlGrp option:selected").val(), SubGroupCode: $("#ddlSubGrp option:selected").val(), ShiftCode: $("#ShiftCode option:selected").val() },
+                success:function(result)
+                {
+                    if(result.msg !="Success")
+                    {
+                        $("#ResultModal").modal('show');
+                        $(".modal-body").html('');
+                        $(".modal-body").append("<a  href='' aria-hidden='true' id='myAlert'></a>");
+                        $(".modal-body").append($("<p class='alert alert-danger'></p>").html(result));
+                    }
+                    else {
+                        $("#CompanyDepRate").val(result.rate);
+                    }
+
+                }
+            });
+
+        });
+
+        //--------------------------------------------------------------------//
+    });
+</script>
+
+<table>
+    <tr>
+        <td>Category Level 1</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.GroupCode, Model.DropDownViewModel.GroupList, new { @id = "ddlGrp" })
+        </td>
+        <td></td>
+        <td>Category Level 2</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubGroup_Code, Model.DropDownViewModel.SubGroupList, new { @id = "ddlSubGrp" })
+        </td>
+    </tr>
+    <tr>
+        <td>Category Level 3</td>
+        <td>
+            @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.AssetName)
+        </td>
+        <td></td>
+        <td>Category Level 4</td>
+        <td>
+            <select>
+                <option>Select</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Shift</td>
+        <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubGroup_ShiftCode, Model.DropDownViewModel.ShiftList, "Select Shift", new  {@id="ShiftCode" })</td>
+        <td></td>
+        <td>Asset Cost</td>
+        <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Amount, new { @readonly = true })</td>
+    </tr>
+</table>
+
+<table>
+    <thead><h2>Company Book</h2></thead>
+    <tbody>
+        <tr>
+            <td>Depreciation Method</td>
+            <td>
+                @*<select>
+                        <option>SLM</option>
+                        <option>WDV</option>
+                    </select>*@
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.Method_Code, Model.DropDownViewModel.MethodList, new { @id="DepMethod"})
+            </td>
+            <td></td>
+            <td>Useful Life(In Year)</td>
+            <td>
+                @*<input type="text" id="txtyear" readonly="readonly"/>*@
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Asset_Life_Year, new { @readonly = true, @id = "txtyear" })
+                @Html.CheckBox("Override", new { @id = "Override" })<label>Override</label>
+            </td>
+
+        </tr>
+        <tr>
+            <td>Salvage Amount</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.SalvageValue)</td>
+            <td></td>
+            <td>Depreciation Rate(%)</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Depriciation_Rate_Com, new { @id = "CompanyDepRate" })</td>
+        </tr>
+        <tr>
+            <td>Salvage %</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.SalvageValue)</td>
+            <td></td>
+            <td>Life In Days</td>
+            @*<td><input type="text" class="LifeDays"></td>*@
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Life_In_Days, new { @class = "LifeDays" })</td>
+        </tr>
+        <tr>
+            <td>Life End Date</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Effe_To, new { @class = "LifeEnd" })</td>
+            <td></td>
+            <td>Useful Life(In Months)</td>
+            <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Asset_Life, new { @id = "cmpnyLife", @readonly = true })<br />
+                @*@Html.CheckBox("Override", new { @id = "Override" })<label>Override</label>*@
+            </td>
+
+        </tr>
+    </tbody>
+</table>
+<table>
+    <thead><h2>IT Book</h2></thead>
+    <tbody>
+        <tr>
+            <td>Depreciation Method</td>
+            @*<td><input type="text" value="WDV" readonly></td>*@
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Method_Code, new { Value = "WDV", @readonly = true })</td>
+            <td></td>
+            <td>Depreciation Rate(%)</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Depriciation_Rate_IT, new { @id = "ItDepRate", @readonly = true })</td>
+        </tr>
+        <tr>
+            <td>Consider 100% Depr in Acquired Year</td>
+            <td><input type="radio">YES<input type="radio">NO</td>
+            <td></td>
+            <td>Depreciable Cost</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.SalvageValue)</td>
+        </tr>
+        <tr>
+            <td>Life End Date</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Effe_To, new { @class = "LifeEnd", @readonly = true })</td>
+            <td></td>
+            <td>Life In Days</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Life_In_Days, new { @class = "LifeDays" })</td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+<div id="ResultModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h2 class="modal-title">ALERT</h2>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="modalclose" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+    </div>
+</div>

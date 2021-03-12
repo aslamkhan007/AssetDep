@@ -1,0 +1,131 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "SubUnitMaster";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#companyddl").change(function () {
+
+            $.ajax({
+                url: '/SubUnitMaster/getUnitList',
+                type:'POST',
+                dataType: 'json',
+                data: { CompanyCode: $("#companyddl option:selected").val() },
+                success: function (data) {
+                    $("#unitddl").html("");
+                    $("#unitddl").prop("disabled",false);
+                    $("#unitddl").append("<option value=''>Select Unit</option>");
+                    for(var i=0;i<data.length;i++)
+                        { 
+                    $("#unitddl").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                    }
+                }
+            });
+        });
+
+
+        //-------------showing list of location for selected unit -------------//
+        $("#unitddl").change(function () {
+                $("#DeleteMaster").jtable({
+                    paging: true,
+                    pageSize: 10,
+                    sorting: true, //Enable sorting
+                    defaultSorting: 'SubUnitName ASC',
+                    selecting: true, //Enable selecting
+                    selectingCheckboxes: true, //Show checkboxes on first column
+                    multiselect: true,
+                    //selectOnRowClick: false, //Enable this to only select using checkboxes
+                    actions: {
+                        listAction: '/SubUnitMaster/SubUnitList',
+                        //deleteAction: '/UnitMaster/UnitDelete'
+                        deleteAction: function (postData) {
+                            console.log("deleting from custom function...");
+                            return $.Deferred(function ($dfd) {
+                                $.ajax({
+                                    url: '/SubUnitMaster/SubUnitDelete',
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    data: { SubUnitCode: postData.SubUnitCode, UnitCode: $("#unitddl").val() },
+                                    success: function (data) {
+                                        $dfd.resolve(data);
+                                    },
+                                    error: function () {
+                                        $dfd.reject();
+                                    }
+                                });
+                            });
+                        },
+                    },
+                    fields: {
+                        SubUnitCode: {
+                            key: true,
+                            create: false,
+                            edit: false,
+                            list: false
+                        },
+                        SubUnitName: {
+                            title: 'SubUnit Name',
+                            width: '12%'
+                        }
+                    },
+
+                });
+                $('#DeleteMaster').jtable('load', {UnitCode: $("#unitddl").val() });
+
+
+        });
+        //----------------------------------------------------------------------//
+
+        $("#SubUnitForm").validate();
+        $("#unitddl").rules("add", { required: true, messages: { required: "Enter Unit Name" } });
+        $("#companyddl").rules("add", { required: true, messages: { required: "Select Company" } });
+        $("#SubUnit").rules("add", { required: true, messages: { required: "Enter Sub Unit Name" } });
+    });
+
+</script>
+<br /><br />
+@using (Html.BeginForm("SubUnitMaster", "SubUnitMaster", FormMethod.Post, new  {@id="SubUnitForm" }))
+{ 
+    <h1>SubUnit Master</h1>
+    <table>
+        <tr>
+            <td>Company Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Company.CompanyCode, Model.DropDownViewModel.CompanyList, "Select Company", new { @id = "companyddl" })</td>
+        </tr>
+        <tr>
+            <td>Unit Name</td>
+            <td>
+                  @Html.DropDownListFor(x => x.Jct_Asset_Dep_Unit.UnitCode, Enumerable.Empty<SelectListItem>(), new { @id = "unitddl", @disabled = true })
+            </td>
+        </tr>
+        <tr>
+            <td>Sub Unit Name</td>
+            <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_SubUnit.SubUnitName, new { @id="SubUnit"})
+            </td>
+        </tr>
+        <tr>
+        <td><input type="Submit"></td>
+        <td></td>
+        </tr>
+    </table>
+    <div id="DeleteMaster"></div>
+}

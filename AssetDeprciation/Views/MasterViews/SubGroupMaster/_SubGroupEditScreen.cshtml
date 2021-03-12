@@ -1,0 +1,35 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+<div id="faq2_q434">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="block">
+                    <!-- Normal Form Title -->
+                    <div class="block-title">
+                        <h2><strong>Edit Sub Group Details </strong></h2>
+                    </div>
+                    <div class="form-horizontal form-bordered">
+                        <table>
+                            <tr>
+                                <td>Group Name</td>
+                                <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Group.GroupCode, Model.DropDownViewModel.GroupList, "Select Group", new { @id = "ddlGroups" })</td>
+                            </tr>
+                            <tr>
+                                <td>SubGroup Name</td>
+                                @Html.HiddenFor(x=>x.Jct_Asset_Dep_SubGroup.SubGroup_Code)
+                                <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_Name, new { @id = "SubGroupNames",@readOnly=true })</td>
+
+                            </tr>
+                            <tr>
+                                <td>SubGroup  Method </td>
+                                <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_MethodCode, Model.DropDownViewModel.MethodList, "Select Method", new { @id = "SubGroupMethod" })</td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

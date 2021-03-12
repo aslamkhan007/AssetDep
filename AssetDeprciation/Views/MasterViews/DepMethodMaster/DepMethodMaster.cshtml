@@ -1,0 +1,115 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "DepMethodMaster";
+}
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        //-------------Jtable------------------------------//
+        $("#DeleteMaster").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            defaultSorting: 'Method_Name ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/DepMethodMaster/DepMethodList',
+                deleteAction: '/DepMethodMaster/DepMethodDelete'
+                //deleteAction: function (postData) {
+                //    console.log("deleting from custom function...");
+                //    return $.Deferred(function ($dfd) {
+                //        $.ajax({
+                //            url: '/SectionMaster/SectionDelete',
+                //            type: 'POST',
+                //            dataType: 'json',
+                //            data: { SectionCode: postData.SectionCode, SubUnitCode: $("#ddlSubUnit").val() },
+                //            success: function (data) {
+                //                $dfd.resolve(data);
+                //            },
+                //            error: function () {
+                //                $dfd.reject();
+                //            }
+                //        });
+                //    });
+                //},
+            },
+            fields: {
+                Method_Code: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                Method_Name: {
+                    title: 'Method Name',
+                    width: '12%'
+                }
+            },
+
+        });
+        $('#DeleteMaster').jtable('load');
+
+        //-------------------------------------------------//
+        $("#DepMethodForm").validate();
+        $("#Method").rules("add", { required: true, messages: { required: "Enter Method Name" } });
+    });
+
+</script>
+<h2>DepMethodMaster</h2>
+
+<br />
+<br />
+@using (Html.BeginForm("DepMethodMaster", "DepMethodMaster", FormMethod.Post, new { @id="DepMethodForm"}))
+{
+    <h1>Depreciation Method Master</h1>
+    <table>
+        <tr>
+            <td>Method Name</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Method.Method_Name, new { @id="Method"})</td>
+        </tr>
+        @*<tr>
+            <td>SubGroup Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubGroup", @disabled = true })</td>
+        </tr>
+        <tr>
+            <td>Depreciation Rate</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_CompanyActRate.Rate)</td>
+        </tr>
+
+        <tr>
+            <td>
+                Financial Year
+            </td>
+            <td>
+                @Html.DropDownListFor(x => x.FinancialYearMasterModel.FinYear, Model.DropDownViewModel.FinancialYearList)
+            </td>
+        </tr>*@
+        <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+    <div id="DeleteMaster"></div>
+}
+

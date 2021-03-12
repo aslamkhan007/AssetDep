@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewBag.Title = "AssetAcquisition";
+}
+
+<script src="~/Scripts/jquery-1.9.1.min.js"></script>
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        $("#AssetGrid").jtable({
+            paging: true,
+            selecting:true,
+            multiselect: false,          
+            actions: {
+                listAction: '/AssetAcquisition/AssetList',
+                updateAction: '/AssetAcquisition/AssetEditInfo',
+              deleteAction:''
+            },
+            fields: {
+                AssetCode: {
+                    title: 'Asset Code',
+                    width: '23%',
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: true
+                },
+                AssetName: {
+                    title: 'Asset Name',
+                    width: '23%'
+                },
+                GroupCode: {
+                    title: 'Group',
+                    width: '12%'
+                },
+                AcquiredAs: {
+                    title: 'Acquired Type',
+                    width:'12%'
+                },
+                Put_In_Use_Date: {
+                    title: 'Date Put To Use',
+                    type: 'date',
+                    displayFormat: 'dd/mm/yy',
+                    width: '12%'
+                },
+                Quantity: {
+                    title: 'Quantity',
+                    width: '13%'
+                },
+                
+            },
+            selectionChanged: function () {
+                //Get all selected rows
+                var $selectedRows = $('#AssetGrid').jtable('selectedRows');
+
+                $('#SelectedRowList').empty();
+                if ($selectedRows.length > 0) {
+                    //Show selected rows
+                    $selectedRows.each(function () {
+                        var record = $(this).data('record');
+                        $("#hdnID").val(record.AssetCode);
+                        
+                    });
+                } else {
+                    //No rows selected
+                    $('#SelectedRowList').append('No row selected! Select rows to see here...');
+                }
+            },
+        });
+        $('#AssetGrid').jtable('load');
+    });
+
+</script>
+<br />
+<br />
+
+<input type="hidden" id="hdnID" />
+
+<h1>Asset Edit </h1>
+<div id="AssetGrid"></div>

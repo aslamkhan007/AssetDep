@@ -1,0 +1,266 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "ITDepreciationCalculation";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.validate.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $("#FromDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+        $("#ToDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+
+        $('input:radio').change(function () {
+            $("#hdnRadioValue").val($(this).val());
+
+            $.ajax({
+                url: '/ITDepreciationCalculation/GetAccountingYearlist',
+                type: 'POST',
+                dataType: 'json',
+                data: { Act: $("#hdnRadioValue").val() },
+                success: function (data) {
+                    $("#AccontingYear").html("");
+                    $("#AccontingYear").val(data[0].Text);
+                }
+            });
+
+
+
+        });
+
+        function FormSubmit() {
+            $("#spinner").fadeIn('fast');
+            return true;
+        };
+
+    });
+</script>
+<script>
+    var OnSuccess = function OnSuccess(msg) {
+
+        //$("#spinner").stop().fadeOut('fast');
+        if (msg === "Success") {
+            //------------------------------Jtable-------------//
+            $("#DepResult").jtable({
+                paging: true,
+                selecting: true,
+                multiselect: false,
+                actions: {
+                    listAction: '/ITDepreciationCalculation/DepCalculationList'
+                },
+                fields: {
+                    AssetCode: {
+                        title: 'Asset Code',
+                        key: true,
+                        create: false,
+                        edit: false,
+                        list: true
+                    },
+                    GroupCode: {
+                        title: 'Group Code',
+                        width: '12%'
+                    },
+                    Cost: {
+                        title: 'Purchase Cost',
+                        width: '12%'
+                    },
+                    //SlmValue: {
+                    //    title: 'Dep Amount per Year',
+                    //    width: '19%',
+                    //    //display: function(data)
+                    //    //{
+                    //    //    data.record.SlmValue.toFixed(2)
+                    //    //},
+                    //    list: true
+                    //},
+                    SalvageValue: {
+                        title: 'Salvage Value',
+                        width: '10%'
+                    },
+                    Asset_Life: {
+                        title: 'Asset Life(Months)',
+                        //display: function (data) {
+                        //    return parseInt(data.record.Asset_Life)
+                        //},
+                        width: '10%'
+                    },
+                    Depriciation_Method: {
+                        title: ' Dep Method',
+                        width: '12%'
+                    },
+                    Life_In_Days: {
+                        title: 'Life(Days)',
+                        width: '12%',
+                        list: false
+                    },
+                    Put_In_Use_Date: {
+                        title: 'Put In Date Use date',
+                        type: 'date',
+                        width: '12%',
+                        list: true
+
+                    },
+                    AccClDt: {
+                        title: 'book Closing Date',
+                        type: 'date',
+                        width: '12%',
+                        list: false
+                    },
+                    DepPeriod: {
+                        title: 'DepPeriod',
+                        //display: function (data) {
+                        //    var difference = new moment(data.record.AccClDt);
+                        //    var future = new moment(data.record.Put_In_Use_Date);
+
+                        //    var diff = parseInt(difference.diff(future, 'months'));
+                        //    //alert(diff);
+                        //   return diff
+                        //}
+
+                    },
+
+                    AccDays: {
+                        title: 'AccDays',
+                        width: '12%',
+                        list: false
+
+                    },
+
+                    DepAmount: {
+                        title: 'DepAmount',
+                        width: '12%',
+                        //display: function(data)
+                        //{
+                        //    return data.record.DepAmount.toFixed(2)
+                        //},
+                        list: true
+
+                    },
+
+                    AccDep: {
+                        title: 'AccDep',
+                        width: '12%',
+                        //display: function(data)
+                        ////{
+                        //// return data.record.AccDep.toFixed(2)
+                        ////},
+                        list: true
+
+                    },
+                    Depriciation_Rate_Com: {
+                        title: 'DepRate',
+                        width: '12%',
+                        //display: function(data)
+                        //{
+                        //    return data.record.Depriciation_Rate_Com.toFixed(2)  
+                        //},
+                        list: true
+
+                    },
+                    //SlmValue: {
+                    //    title: 'SlmValue',
+                    //    width: '12%',
+                    //    list: true
+                    //    //display: function (data)
+                    //    //{
+                    //    //    return parseInt(data.record.SlmValue * data.record.DepPeriod)
+
+                    //    //}
+                    //}
+                }
+            });
+            //------------------------------------------------//
+
+            $('#DepResult').jtable('load');
+        }
+        else {
+            alert("Something went wrong!!!!");
+        }
+
+
+    }
+
+</script>
+<style>
+    div#spinner {
+        display: none;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0%;
+        text-align: center;
+        z-index: 100;
+        overflow: auto;
+    }
+</style>
+<br /><br /><br />
+<h1>ITDepreciation Calculation</h1>
+@*OnBegin = "return FormSubmit() ",*@
+@using (Ajax.BeginForm("ITDepreciationCalculation","ITDepreciationCalculation", null, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { @id = "dakentry", onkeydown = "return (event.keyCode!=13);" }))
+{
+    <table>
+
+
+        <tr>
+            <td>Category</td>
+            <td></td>
+
+            <td>
+                @Html.ListBoxFor(x => x.selectedGroupCode,
+                 new MultiSelectList(Model.DropDownViewModel.GroupList, "Value", "Text"))
+                @*@Html.ListBoxFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_Code, Model.DropDownViewModel.SubGroupList, new { @id = "CklSubGroup" })*@
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4"><h5>Note:-To Select Multiple Group Hold Ctrl Key</h5></td>
+        </tr>
+
+        <tr>
+            <td>Accounting Year</td>
+            <td></td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Book_AccountingYear.AccYear, Model.DropDownViewModel.AccontingYearlist, new { @id = "ddlAccountingYear" })
+                @*@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Effe_To, new { @id = "AccontingYear", @class = "ToDate" })*@
+            </td>
+
+        </tr>
+
+        <tr>
+            <td><input type="submit" value="Calculate"></td>
+            <td></td>
+            <td></td>
+        </tr>
+
+
+    </table>
+
+
+
+    <div id="DepResult">
+    </div>
+    @*Ajax Laoding Modal------------------------------------------------------------------------------------------*@
+
+    <div id="spinner" style="background: rgba(0, 0, 0, 0.5) none no-repeat fixed center center;">
+
+        <img src="~/Content/images/ajax-loader.gif" alt="Please Wait............" style="margin-top: 30%; margin-right: 17%;" />
+    </div>
+    @*------------------------------------------------------------------------------------------------------------*@
+    <div>
+        <button onclick="window.location = '/ITDepreciationCalculation/FreezeCalculations'" class="btn btn-primary">Freeze</button>
+
+    </div>
+}
+

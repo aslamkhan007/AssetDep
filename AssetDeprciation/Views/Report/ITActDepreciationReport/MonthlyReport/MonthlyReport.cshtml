@@ -1,0 +1,261 @@
+﻿
+@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "MonthlyReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/i18n/grid.locale-en.js"></script>
+<script src="~/Scripts/jquery.jqGrid.js"></script>
+<link href="~/Content/ui.jqgrid.css" rel="stylesheet" />
+<link href="~/Content/ui.jqgrid-bootstrap.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+@*<script src="~/Scripts/jquery.jqGrid.min.js"></script>*@
+@*<link href="~/Content/jquery-ui.css" rel="stylesheet" />*@
+
+@*------------------Export table js Files--------------------*@
+<script src="~/Scripts/ExportTable/tableExport.js"></script>
+<script src="~/Scripts/ExportTable/jquery.base64.js"></script>
+<script src="~/Scripts/ExportTable/jspdf/libs/sprintf.js"></script>
+<script src="~/Scripts/ExportTable/jspdf/jspdf.js"></script>
+<script src="~/Scripts/ExportTable/jspdf/libs/base64.js"></script>
+
+@*---------------------End Export table Js-------------------*@
+<style>
+    .row.extra-bottom-padding {
+        margin-top: 20px;
+    }
+    /*#JQGRID {
+        overflow: auto;
+        width: 100% !important;
+    }*/
+    .ui-jqgrid .ui-jqgrid-titlebar {
+        background: rgba(0, 0, 0, 0) linear-gradient(to bottom, rgba(230, 230, 230, 1) 0%, rgba(178, 178, 178, 1) 40%, rgba(255, 255, 255, 1) 100%) repeat scroll 0 0;
+        border-color: #e7e7e7;
+    }
+
+    .ui-jqgrid .ui-jqgrid-toppager .ui-pager-control, .ui-jqgrid .ui-jqgrid-pager .ui-pager-control {
+        background: rgba(0, 0, 0, 0) linear-gradient(to bottom, rgba(230, 230, 230, 1) 0%, rgba(178, 178, 178, 1) 40%, rgba(255, 255, 255, 1) 100%) repeat scroll 0 0;
+        border-color: #e7e7e7;
+    }
+
+    .ui-jqgrid .ui-jqgrid-bdiv {
+        background: rgba(0, 0, 0, 0) linear-gradient(to bottom, rgba(230, 230, 230, 1) 0%, rgba(178, 178, 178, 1) 40%, rgba(255, 255, 255, 1) 100%) repeat scroll 0 0;
+    }
+
+    .ui-jqgrid .ui-jqgrid-titlebar-close {
+        color: rgb(180,0,0);
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#ExportData").hide();
+        $("#btnFetch").click(function () {
+            $("#ExportData").show();
+            var year = $("#ddlFinYear option:selected").val();
+            $("#JQGRID").empty().append(" <table id='evalcomps' class='jqGridTable'></table><div id='pager'></div>");
+            jQuery("#evalcomps").jqGrid('jqPivot', "/ITActDepreciationReport/MonthlyReport/getMonthlyReport?FinYear=" + year,
+	        {
+	            // pivot options
+	            xDimension:
+                [
+                    { dataName: 'GroupCode', width: 90 },
+                     { dataName: 'SubGroupCode' },
+
+
+                ],
+	            groupSummaryPos: 'footer',
+	            aggregates: [
+                   {
+                       member: 'Apr',
+                       aggregator: 'sum',
+                       width: 80,
+                       label: 'April',
+                       formatter: 'number',
+                       align: 'right',
+                       summaryType: 'sum'
+                   }
+                   , {
+                       member: 'May',
+                       aggregator: 'sum',
+                       width: 80,
+                       label: 'May',
+                       formatter: 'number',
+                       align: 'right',
+                       summaryType: 'sum'
+                   }
+
+                , {
+                    member: 'Jun',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'June',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }
+                , {
+                    member: 'Jul',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'July',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Aug',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'August',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Sep',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'September',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Oct',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'October',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Nov',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'November',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Dec',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'December',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Jan',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'January',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Feb',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'February',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }, {
+                    member: 'Mar',
+                    aggregator: 'sum',
+                    width: 80,
+                    label: 'March',
+                    formatter: 'number',
+                    align: 'right',
+                    summaryType: 'sum'
+                }
+
+	            ],
+	            yDimension:
+                    [
+
+                        { dataName: 'A' }
+
+                    ],
+
+
+	        },
+            {
+                jsonReader: {
+                    root: "rows",
+                    page: "",
+                    total: "",
+                    records: "records",
+                    repeatitems: false,
+                    id: "0",
+
+                },
+                width: 700,
+                styleUI: 'Bootstrap',
+                rowNum: 10,
+                gridview: true,
+                height: "100%",
+                emptyrecords: "No record to Display",
+                pager: "#pager",
+                loadonce: true,
+                caption: "IT Act Yearly Depereciation Report",
+                autowidth: true
+            });
+
+
+        });
+
+
+
+    });
+</script>
+
+<div class="panel-body">
+    <div class="container">
+        <div class="page-header">
+            <h2>Monthly Depreciation Report</h2>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <div class="col-xs-push-3 col-xs-4 ">
+                    <label class="control-label">Financial Year</label>
+
+                    @Html.DropDownListFor(x => x.ReportViewModel.ReportFieldModel.FinancialYear, Model.DropDownViewModel.FinancialYearList, "Select Financial Year", new { @id = "ddlFinYear", @class = "form-control" })
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row extra-bottom-padding">
+
+            <div class="form-group">
+                <div class=" col-xs-push-3 col-xs-3">
+                    <input type="button" value="Fetch" id="btnFetch" class="btn btn-primary " />
+                </div>
+            </div>
+        </div>
+
+        <div class="row extra-bottom-padding">
+            <div class="form-group">
+                <div class="btn-group row  col-xs-3" style="padding-bottom: 7px;padding-left: 30px;" id="ExportData">
+                    <button class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i> Export Table Data</button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li></li>
+                        <li><a href="#" onclick="$('#gview_evalcomps').tableExport({ type: 'excel', tableName: 'Testing', escape: 'false' });"> <img src="~/images/excel.png" width="24px"> XLS</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" onclick="$('#gview_evalcomps').tableExport({ type: 'pdf', pdfFontSize: '3', escape: 'false' });"><img src="~/images/pdf.png" width="24px" />PDF</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="table-responsive">
+                    <div id="JQGRID"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

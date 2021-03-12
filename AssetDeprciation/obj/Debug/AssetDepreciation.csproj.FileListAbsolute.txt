@@ -1,0 +1,7 @@
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\obj\Debug\AssetDepreciation.csprojResolveAssemblyReference.cache
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\bin\AssetDeprciation.dll.config
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\bin\AssetDeprciation.dll
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\bin\AssetDeprciation.pdb
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\obj\Debug\AssetDeprciation.dll
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\obj\Debug\AssetDeprciation.pdb
+C:\Users\aslam\Desktop\AssetDepreciation\AssetDeprciation\bin\Microsoft.Web.Infrastructure.dll

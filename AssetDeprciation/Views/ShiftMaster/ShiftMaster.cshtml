@@ -1,0 +1,89 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "ShiftMaster";
+}
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+
+    $(document).ready(function () {
+
+        //---------Jtable---------//
+        $("#DeleteMaster").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            defaultSorting: 'Shift_Name ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/ShiftMaster/ShiftList',
+                deleteAction: '/ShiftMaster/DeleteShiftList'
+            },
+            fields: {
+                ShiftCode: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                Shift_Name: {
+                    title: 'Shift Name',
+                    width: '12%'
+                }
+            },
+
+        });
+
+        $("#DeleteMaster").jtable('load');
+        $("#DeleteMaster").on('click', function () {
+            if (confirm("These Selected Record Will Be Deleted. Are You Sure???")) {
+                var $selectedRows = $('#GroupMaster').jtable('selectedRows');
+                $("#GroupMaster").jtable('deleteRows', $selectedRows);
+            }
+            return false;
+        });
+
+
+        $("#ShiftForm").validate();
+        $("#txtShift").rules("add", { required: true, messages: { required: "Select a Shift" } });
+    });
+
+</script>
+<br>
+<br />
+@using (Html.BeginForm("ShiftMaster", "ShiftMaster", FormMethod.Post, new { @id = "ShiftForm" }))
+{
+    <h1>Shift Master</h1>
+    <table>
+        <tr>
+            <td>Shift Name</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Shift.Shift_Name,  new { @id = "txtShift" })</td>
+        </tr>
+
+        <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+    <div id="DeleteMaster"></div>
+}

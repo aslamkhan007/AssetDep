@@ -1,0 +1,203 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+
+<script src="~/Scripts/jquery-ui-1.11.4.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+@*<link href="~/Content/jQuery%20UI-1.10.3.css" rel="stylesheet" />*@
+<script src="~/Scripts/jquery.validate.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#InsuranceDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+        $("#ExpiryDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+        $("#PoDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+
+        $("#BillDate").datepicker({
+            maxDate: 'now',
+            autoclose: true
+        });
+          
+    });
+</script>
+
+
+
+
+
+    <h1>Asset Additional Info</h1>
+    <table>
+        <thead><h2>Insurance Details</h2></thead>
+        <tbody>
+            <tr>
+                <td>
+                    Insurance Name
+                </td>
+                <td>
+                    @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Insurance_Name)
+                </td>
+                <td>
+                    Insurance Date
+                </td>
+                <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Bill_Info.Insurance_Date, new { @id = "InsuranceDate" })                  
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    Insurance Type
+                </td>
+                <td>
+                    @Html.DropDownListFor(x => x.Jct_Asset_Dep_Bill_Info.Insurance_Type, Model.DropDownViewModel.InsuranceList )
+                </td>
+                <td>
+                    Insurance Expiry Date
+                </td>
+                <td>
+                    @Html.TextBoxFor(x => x.Jct_Asset_Dep_Bill_Info.Effe_To, new { @id = "ExpiryDate" }) 
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    Insurer Name
+                </td>
+                <td>
+                    @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Insurer_Name, new { @id = "Insurer_Name" })
+                </td>
+                <td>
+                    Policy Number
+                </td>
+                <td>
+                    @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Policy_No, new { @id = "Policy_No" })
+                </td>
+            </tr>
+
+
+
+        <tbody>
+
+    </table>
+
+</body>
+
+<table>
+    <thead><h2>Invoice Details</h2></thead>
+    <tbody>
+        <tr>
+            <td>
+                Invoice
+            </td>
+            <td>
+               @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Invoice_NO)
+            </td>
+            <td>
+                Invoice Attachment
+            </td>
+            <td>
+        @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Invoice_Attachment)
+            </td>
+        </tr>
+    <tbody>
+</table>
+
+
+
+<table>
+    <thead><h2>Purchase Details</h2></thead>
+    <tbody>
+
+        <tr>
+            <td>
+                PO Number
+            </td>
+            <td>
+                @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.PO_No)
+            </td>
+            <td>
+                PO  Date
+            </td>
+            <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.PurchaseDate, new { @id = "PoDate" }) 
+            </td>
+        </tr>
+
+
+        <tr>
+            <td>
+                Bill Number
+            </td>
+            <td>
+                 @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Bill_No)
+            </td>
+            <td>
+                Bill  Date
+            </td>
+            <td>
+                 @Html.TextBoxFor(x => x.Jct_Asset_Dep_Bill_Info.Bill_Date, new { @id = "BillDate" })
+            </td>
+        </tr>
+
+
+
+        <tr>
+            <td>
+                Manufacturer
+            </td>
+            <td>
+                 @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Manufacture)
+            </td>
+            <td>
+                Model Name
+            </td>
+            <td>
+               @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Modal)
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                Vendor Name
+            </td>
+            <td>
+                @Html.TextBoxFor(x=>x.Jct_Asset_Dep_Bill_Info.Supplier)
+            </td>
+                       <td>
+             Asset Type
+            </td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Bill_Info.Imported_Indegeneous, new List<SelectListItem> { new SelectListItem { Text = "Indegineous", Value = "Indegineous" } })
+        </tr>
+
+
+        <tr>
+            <td>
+                Custom Duty
+            </td>
+            <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Bill_Info.Custom_Duty)
+            </td>
+            <td>
+                CANVAT
+            </td>
+            <td>
+                @Html.TextBoxFor(x => x.Jct_Asset_Dep_Bill_Info.Cenvat)
+        </tr>
+
+
+        </table>
+    </tbody>
+

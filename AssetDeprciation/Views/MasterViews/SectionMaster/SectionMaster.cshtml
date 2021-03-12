@@ -1,0 +1,162 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "SectionMaster";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $("#companyddl").change(function () {
+            $("#ddlUnit").prop("disabled", false);
+            $.ajax({
+                url: '/SectionMaster/GetunitList',
+                type:'POST',
+                dataType: 'json',
+                data: { CompanyCode: $("#companyddl option:selected").val() },
+                success: function (data) {
+                    $("#ddlUnit").html("");
+                    $("#ddlUnit").prop("disabled", false);
+                    $("#ddlUnit").append("<option value=''>Select Unit</option>");
+                    for(var i=0;i<data.length;i++)
+                        {
+                        $("#ddlUnit").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                    }
+                }
+            });
+        });
+
+        $("#ddlUnit").change(function () {
+            $("#ddlSubUnit").prop("disabled", false);
+            $.ajax({
+                url: '/SectionMaster/GetsubunitList',
+                type: 'POST',
+                dataType: 'json',
+                data: { CompanyCode: $("#companyddl option:selected").val(), UnitCode: $("#ddlUnit option:selected").val() },
+                success: function (data) {
+                    $("#ddlSubUnit").html("");
+                    $("#ddlSubUnit").prop("disabled", false);
+                    $("#ddlSubUnit").append("<option value=''>Select SubUnit</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $("#ddlSubUnit").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                    }
+                }
+            });
+        });
+
+        //----------------------------section Subsection list as per subunit code--------------//
+        $("#ddlSubUnit").change(function () {
+            $("#DeleteMaster").jtable({
+                paging: true,
+                pageSize: 10,
+                sorting: true, //Enable sorting
+                defaultSorting: 'SectionName ASC',
+                selecting: true, //Enable selecting
+                selectingCheckboxes: true, //Show checkboxes on first column
+                multiselect: true,
+                //selectOnRowClick: false, //Enable this to only select using checkboxes
+                actions: {
+                    listAction: '/SectionMaster/SectionList',
+                    //deleteAction: '/UnitMaster/UnitDelete'
+                    deleteAction: function (postData) {
+                        console.log("deleting from custom function...");
+                        return $.Deferred(function ($dfd) {
+                            $.ajax({
+                                url: '/SectionMaster/SectionDelete',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: { SectionCode: postData.SectionCode, SubUnitCode: $("#ddlSubUnit").val() },
+                                success: function (data) {
+                                    $dfd.resolve(data);
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                },
+                fields: {
+                    SectionCode: {
+                        key: true,
+                        create: false,
+                        edit: false,
+                        list: false
+                    },
+                    SectionName: {
+                        title: 'Section Name',
+                        width: '12%'
+                    }
+                },
+
+            });
+            $('#DeleteMaster').jtable('load', {SubUnitCode: $("#ddlSubUnit").val() });
+
+
+            });
+
+        //---------------------------------------------------------------------------------------//
+        $("#SectionForm").validate();
+         $("#ddlUnit").rules("add", { required: true, messages: { required: "Select Unit" } });
+       $("#companyddl").rules("add", { required: true, messages: { required: "Select Company" } });
+       $("#ddlSubUnit").rules("add", { required: true, messages: { required: "Select Sub Unit" } });
+       $("#SectionName").rules("add", { required: true, messages: { required: "Enter Section Name" } });
+        $("#SubSectionName").rules("add", { required: true, messages: { required: "Enter SubSection Name" } });
+    });
+
+</script>
+<br /><br />
+<br />
+<br />
+<h2>SectionMaster</h2>
+@using (Html.BeginForm("SectionMaster", "SectionMaster", FormMethod.Post, new { @id="SectionForm"}))
+{ 
+<table>
+    <tr>
+        <td>Company</td>        
+        <td>        
+        @Html.DropDownListFor(x => x.Jct_Asset_Dep_Section.CompanyCode, Model.DropDownViewModel.CompanyList, "Select Company", new { @id = "companyddl" })
+        </td>
+    </tr>
+    <tr>
+        <td>Unit</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Section.UnitCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlUnit", @disabled = true })
+        </td>
+    </tr>
+    <tr>
+        <td>Sub Unit</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Section.SubUnitCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubUnit", @disabled = true })
+        </td>
+    </tr>
+    <tr>
+        <td>Section</td>
+        <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Section.SectionName, new { @id="SectionName"})</td>
+    </tr>
+    <tr>
+        <td>Sub Section</td>
+        <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Section.Sub_SectionName, new { @id="SubSectionName"})</td>
+    </tr>
+    <tr>
+        <td> <input type="submit" value="Submit" /></td>
+
+    </tr>
+</table>
+    <div id="DeleteMaster"></div>
+}

@@ -1,0 +1,443 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/moment.js"></script>
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script>
+
+    $(document).ready(function () {
+        
+        $("#SubAssetDetails").hide();
+        $("#Assetrelation").change(function () {
+            if($(this).val()==="Dependent-Child")
+            {
+                $("#SubAssetDetails").show();
+            }
+
+          else  if ($(this).val() === "Independent-Child") {
+              $("#SubAssetDetails").show();
+
+            }
+            else  
+            {
+                $("#SubAssetDetails").hide();
+            }
+        });
+        var InUseDate = null;
+        $("#PurchaseDate").datepicker({
+        });
+        $("#PutInUse").datepicker({
+            onClose: function () {
+                InUseDate = $(this).val();
+            }
+        });
+        $("#life").on("focusout", function () {
+            
+            //var date = new Date(InUseDate);
+            //var sum = parseInt(date.getMonth()) + parseInt($(this).val());
+            //date.setMonth(sum);
+            var date = moment(InUseDate);
+            var endDate = moment(date).add($(this).val(), 'months');
+            $("#LifeEnd").val(endDate.format('L'));
+        });
+        $("#Cost").on("focusout",function()
+        {
+            var salvage = Math.round(parseInt($(this).val()) * 0.05, 2);
+            $("#SalValue").val(salvage);
+        });         
+   
+    $("#ddlGroup").change(function () {
+        $("#ddlSubGroup").prop("disabled", false);           
+        $.ajax({
+            url: '/Asset/GetSubgrouplist',
+            type: 'POST',
+            dataType: 'json',
+            data: { GroupCode: $("#ddlGroup option:selected").val() },
+            success: function (data) {               
+                $("#ddlSubGroup").html("");
+                $("#ddlSubGroup").append("<option value=''>Select Sub Group</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlSubGroup").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                }
+            }
+        });
+    });
+    $("#DepMethod").change(function () {
+        $.ajax({
+            url: '/Asset/GetShiftDetails',
+            type: 'POST',
+            dataType: 'json',
+            data: { SubGroupCode: $("#ddlSubGroup option:selected").val(), SubGroup_ShiftCode: $("#ddlShift  option:selected").val(), SubGroupMethod: $("#DepMethod option:selected").val() },
+            success: function (data) {
+             
+                $("#hdngrplife").val(data.GroupLife);
+                $("#hdnestmlife").val(data.EstimatedLife);
+
+                var YeartoMonth = null;
+                var OrigYears = null;
+                var AddMonth = null;
+
+
+                if ($("input[type='radio']:checked").val() == 'Life') {
+                    
+                    $("#life").val($("#hdngrplife").val());
+                    
+                    OrigYears = $("#life").val($("#hdngrplife").val());
+
+                    var splitstring = OrigYears.val().split('.');
+                    var years = parseInt(splitstring[0]) * 12;
+                    var months = splitstring[1];
+                    if (typeof splitstring[1] === "undefined") {
+
+                        $("#life").val(years);
+                    }
+                    else {
+
+                        var val = parseInt(years) + parseInt(months);
+                        $("#life").val(val);
+                    }
+
+
+                }
+                else {
+                    $("#life").val($("#hdnestmlife").val());
+                    OrigYears = $("#life").val($("#hdnestmlife").val());
+
+                    var splitstring = OrigYears.val().split('.');
+                    var years = parseInt(splitstring[0]) * 12;
+                    var months = splitstring[1];
+                    if (typeof splitstring[1] === "undefined") {
+                        $("#life").val(years);
+                    }
+                    else {
+
+                        var val = parseInt(years) + parseInt(months);
+                        $("#life").val(val);
+                    }
+
+
+
+
+
+                }
+                var date = moment(InUseDate);
+                var endDate = moment(date).add($("#life").val(), 'months');
+                $("#LifeEnd").val(endDate.format('L'));
+
+
+
+            }
+        
+        });
+
+    });
+
+
+    $("input[type='radio']").click(function () {
+        var YeartoMonth = null;
+        var OrigYears = null;
+        var AddMonth = null;
+        if ($(this).val() == 'Life')
+        {
+
+            $("#life").val($("#hdngrplife").val());
+            
+            OrigYears = $("#life").val($("#hdngrplife").val());
+            
+            var splitstring = OrigYears.val().split('.');
+            var years =parseInt(splitstring[0]) * 12;
+            var months = splitstring[1];
+            if (typeof splitstring[1] === "undefined") {
+                
+                $("#life").val(years);
+            }
+            else {
+
+                var val = parseInt(years) + parseInt(months);
+                $("#life").val(val);
+            }
+              
+ 
+        }
+        else
+        {
+            $("#life").val($("#hdnestmlife").val());
+            OrigYears = $("#life").val($("#hdnestmlife").val());
+
+            var splitstring = OrigYears.val().split('.');
+            var years = parseInt(splitstring[0]) * 12;
+            var months = splitstring[1];
+            if (typeof splitstring[1] === "undefined") {
+                $("#life").val(years);
+            }
+            else {
+
+                var val = parseInt(years) + parseInt(months);
+                $("#life").val(val);
+            }
+
+      
+
+
+
+        }
+
+
+        var date = moment(InUseDate);
+        var endDate = moment(date).add($("#life").val(), 'months');
+        $("#LifeEnd").val(endDate.format('L'));
+
+    });
+
+
+    $("#ddlCompany").change(function () {
+        $("#ddlUnit").prop("disabled", false);
+        $.ajax({
+            url: '/Asset/GetUnitlist',
+            type: 'POST',
+            dataType: 'json',
+            data: { CompanyCode: $("#ddlCompany option:selected").val() },
+            success: function (data) {
+                $("#ddlUnit").html("");
+                $("#ddlUnit").append("<option value=''>Select Sub Group</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlUnit").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                }
+            }
+        });
+    });
+    
+    $("#ddlUnit").change(function () {
+        $("#ddlSubUnit").prop("disabled", false);
+        $.ajax({
+            url: '/Asset/GetSubUnitlist',
+            type: 'POST',
+            dataType: 'json',
+            data: { UnitCode: $("#ddlUnit option:selected").val() },
+            success: function (data) {
+                $("#ddlSubUnit").html("");
+                $("#ddlSubUnit").append("<option value=''>Select Sub Group</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlSubUnit").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                }
+            }
+        });
+    });
+
+    $("#ddlSubUnit").change(function () {
+        $("#ddlSection").prop("disabled", false);
+        $.ajax({
+            url: '/Asset/GetSectionList',
+            type: 'POST',
+            dataType: 'json',
+            data: { SubUnitCode: $("#ddlSubUnit option:selected").val() },
+            success: function (data) {
+                $("#ddlSection").html("");
+                $("#ddlSection").append("<option value=''>Select Sub Group</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlSection").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                }
+            }
+        });
+    });
+
+    $("#ddlSection").change(function () {
+        $("#ddlSubSection").prop("disabled", false);
+        $.ajax({
+            url: '/Asset/GetSubSectionList',
+            type: 'POST',
+            dataType: 'json',
+            data: { SectionCode: $("#ddlSection option:selected").val() },
+            success: function (data) {
+                $("#ddlSubSection").html("");
+                $("#ddlSubSection").append("<option value=''>Select Sub Group</option>");
+                for (var i = 0; i < data.length; i++) {
+                    $("#ddlSubSection").append($("<option></option>").val(data[i].Value).html(data[i].Text));
+                }
+            }
+        });
+    });
+    $("#AssetForm").validate();
+    $("#ddlCompany").rules("add", { required: true, messages: { required: "Select Company" } });
+    $("#ddlUnit").rules("add", { required: true, messages: { required: "Select Unit" } });
+    $("#ddlSubUnit").rules("add", { required: true, messages: { required: "Select SubUnit" } });
+    $("#ddlSection").rules("add", { required: true, messages: { required: "Select Section" } });
+    $("#ddlGroup").rules("add", { required: true, messages: { required: "Select Group" } });
+    $("#ddlSubGroup").rules("add", { required: true, messages: { required: "Select SubGroup" } });
+    $("#DepMethod").rules("add", { required: true, messages: { required: "Select DepMethod" } });
+    $("#AssetName").rules("add", { required: true, messages: { required: "Enter Asset Name" } });
+    $("#Policy_No").rules("add", { required: true, messages: { required: "Enter Policy Number" } });
+    $("#Insurer_Name").rules("add", { required: true, messages: { required: "Enter Insurer Name" } });
+    
+    });
+
+</script>
+<br />
+<br />
+@using (Html.BeginForm("AssetMaster", "Asset", FormMethod.Post, new { @id="AssetForm"}))
+{
+    
+    <input type="hidden" id="hdngrplife" />
+    <input type="hidden" id="hdnestmlife" />
+    <h1>Asset Entry</h1>
+    <table >
+        <tr>
+            <td>Acquired As</td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.AcquiredAs, new List<SelectListItem>{
+               new SelectListItem{Text="Purchased",Value="Purchased"},
+               new SelectListItem{Text="Shifted In",Value="Shifted"}
+           })
+        </td>
+        <td></td>
+        <td>Acquired Type</td>
+        <td>
+            @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.AcquiredType, new List<SelectListItem>{
+               new SelectListItem {Text="Independent",Value="Independent"},
+               new SelectListItem {Text="Independent-Child",Value="Independent-Child"},
+               new SelectListItem {Text="Dependent-Child",Value="Dependent-Child"}
+           }, new { @id="Assetrelation"})
+    </td>
+    </tr>
+        <tr>
+            <td>Company</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.CompanyCode, Model.DropDownViewModel.CompanyList, "Select Company", new { @id = "ddlCompany" })</td>
+            <td></td>
+            <td>Unit</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.UnitCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlUnit", @disabled = true })</td>
+        </tr>
+        <tr>
+            
+            <td>Sub Unit</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubUnitCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubUnit", @disabled = true })</td>
+            <td></td>
+            <td>Section</td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SectionCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSection", @disabled = true })
+            </td>
+
+        </tr>
+        <tr>
+            <td>SubSection</td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubSectionCode, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubSection", @disabled = true })
+            </td>
+            <td></td>
+            <td>SubArea</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.SubArea)</td>
+        </tr>
+        <tr>
+            <td>Group</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.GroupCode, Model.DropDownViewModel.GroupList, "Select Group", new { @id = "ddlGroup" })</td>
+            <td></td>
+            <td>Sub Group</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubGroup_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubGroup", @disabled = true })</td>
+        </tr>
+       
+        <tr>
+            <td>Asset Id</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.AssetCode)</td>
+            <td></td>
+            <td>Asset Name</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.AssetName, new { @id="AssetName"})</td>
+
+        </tr> 
+        <tr id="SubAssetDetails">
+            <td>SubAsset Code</td>
+            <td>@Html.TextBoxFor(x=>x.Jct_Asset_Dep_Sub_Asset.Sub_AssetCode)</td>
+            <td></td>
+            <td>SubAsset Name</td>
+            <td>@Html.TextBoxFor(x=>x.Jct_Asset_Dep_Sub_Asset.Sub_AssetName)</td>
+        </tr>      
+        <tr>
+            <td>Purchase Date</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.PurchaseDate, new { @id = "PurchaseDate" })</td>
+            <td></td>
+            <td>Date Put to Use</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Put_In_Use_Date, new { @id = "PutInUse" })</td>           
+        </tr>
+
+        <tr>
+            <td>Policy Number</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Policy_No, new { @id = "Policy_No" })</td>
+            <td></td>
+            <td>Insurer Name</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Insurer_Name, new { @id = "Insurer_Name" })</td>
+        </tr>
+
+        <tr>
+            <td>Tangiable/Intangiable</td>          
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.Tangiable, new List<SelectListItem>{
+               new SelectListItem {Text="Tangiable",Value="Tangiable"},
+               new SelectListItem {Text="Intangiable",Value="Intangiable"},               
+           }, new { @id = "Intangiable" })
+            </td>
+
+            <td></td>
+            <td>Shift</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.SubGroup_ShiftCode, Model.DropDownViewModel.ShiftList, "Select Shift", new { @id = "ddlShift" })</td>
+        </tr>
+
+        <tr>                
+            <td>Qty</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Quantity)</td>
+            <td></td>
+            <td>Cost</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Amount, new { @id = "Cost" })</td>
+        </tr>
+      <tr>
+          <td></td>
+          <td>
+              <input type="radio" value="Life" id="GroupLife" checked="checked" name="life"/> SubGroup Life&nbsp;
+              <input type="radio" value="EstimatedUsefulLife" id="EstimatedLife" name="life" />Esitmated Life
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+        <tr>            
+            <td>Life(Months)
+           
+            </td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Asset_Life, new { @id = "life" })</td>
+            <td></td>
+            <td>Salvage value</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.SalvageValue, new { @id = "SalValue", @ReadOnly = true })</td>            
+        </tr>
+
+        <tr>
+            <td>Method</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Asset.Method_Code, Model.DropDownViewModel.MethodList, "Select Dep Method", new { @id = "DepMethod" })</td>
+            <td></td>
+            <td>Life Ends On</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Asset.Effe_To, new { @id = "LifeEnd", @ReadOnly = true })</td>
+        </tr>
+      
+        
+        
+        
+        
+        <tr>
+            <td><input type="submit" value="submit"></td>
+        </tr>
+    </table>
+
+}
+

@@ -1,0 +1,151 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "SubGroupMaster";
+}
+<script>
+    function MyFunction(foo) {
+        $("#ddlGroups").val($("#ddlGroup").val());
+        $("#SubGroupNames").val(foo.SubGroup_Name);
+        $("#ddlShift ").val(foo.SubGroup_ShiftCode);
+        $("#SubGroupMethod").val(foo.SubGroup_MethodCode);
+        $("#Jct_Asset_Dep_SubGroup_SubGroup_Code").val(foo.SubGroup_Code);
+        $("#myModal").modal('show');
+
+    };
+    $(document).ready(function () {
+
+
+
+        //------------------list of Subgroup on basis of Group---------------//
+        $("#ddlGroup").change(function () {
+            $("#DeleteMaster").jtable({
+                paging: true,
+                pageSize: 10,
+                sorting: true, //Enable sorting
+                defaultSorting: 'SubGroup_Name ASC',
+                selecting: true, //Enable selecting
+                selectingCheckboxes: true, //Show checkboxes on first column
+                multiselect: true,
+                //selectOnRowClick: false, //Enable this to only select using checkboxes
+                actions: {
+                    listAction: '/SubGroupMaster/SubGroupList',
+                    //deleteAction: '/DepMethodMaster/DepMethodDelete'
+                    deleteAction: function (postData) {
+                        console.log("deleting from custom function...");
+                        return $.Deferred(function ($dfd) {
+                            $.ajax({
+                                url: '/SubGroupMaster/SubGroupDelete',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: { SubGroupCode: postData.SubGroup_Code, GroupCode: $("#ddlGroup").val() },
+                                success: function (data) {
+                                    $dfd.resolve(data);
+                                },
+                                error: function () {
+                                    $dfd.reject();
+                                }
+                            });
+                        });
+                    },
+                },
+                fields: {
+                    SubGroup_Code: {
+                        key: true,
+                        create: false,
+                        edit: false,
+                        list: false
+                    },
+                    SubGroup_Name: {
+                        title: 'Method Name',
+                        width: '12%'
+                    },
+                    SubGroup_MethodCode: {
+                        title: 'Method',
+                        width:'12%'
+                    },
+                    edit: {
+                        width: '1%',
+                        display:function(data)
+                        {
+                            var Groupid = $("#ddlGroup").val();
+                            var SubGroupid = data.record.SubGroup_Code;
+                            var temp = JSON.stringify(data.record);
+                          //  "event.preventDefault(); myfunc({a:1, b:'hi'});"
+                            //return '<a href="#"  onClick="event.preventDefault();  MyFunction({ foo: ' + "temp" + ' });"><img src="~/Scripts/jtable/themes/lightcolor/edit.png" /></a>';
+                            return "<a href='#'  onClick='event.preventDefault();  MyFunction("+temp+");'><img src='../Scripts/jtable/themes/metro/edit.png' /></a>";
+                        }
+                    }
+                },
+
+            });
+            $('#DeleteMaster').jtable('load', { GroupCode: $("#ddlGroup").val() });
+
+
+        });
+
+        //-------------------------------------------------------------------//
+        $("#SubGroupForm").validate();
+        $("#ddlGroup").rules("add", { required: true, messages: { required: "Select a Group" } });
+        $("#SubGroupName").rules("add", { required: true, messages: { required: "Enter SubGroup Name" } });
+    });
+
+</script>
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<br /><br />
+@using (Html.BeginForm("SubGroupMaster", "SubGroupMaster", FormMethod.Post, new { @id="SubGroupForm"}))
+{
+    <h1>SubGroup Master</h1>
+    <table>
+        <tr>
+            <td>Group Name</td>
+            <td>@Html.DropDownListFor(x => x.Jct_Asset_Dep_Group.GroupCode, Model.DropDownViewModel.GroupList, "Select Group", new { @id="ddlGroup"})</td>
+        </tr>
+        <tr>
+            <td>SubGroup Name</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_SubGroup.SubGroup_Name, new { @id="SubGroupName"})</td>
+            
+        </tr>
+        <tr>
+        <td>SubGroup  Method </td>
+            <td>@Html.DropDownListFor(x=>x.Jct_Asset_Dep_SubGroup.SubGroup_MethodCode,Model.DropDownViewModel.MethodList,"Select Method")</td>
+        </tr>       
+         <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+    <div id="DeleteMaster"></div>
+}
+@using (Html.BeginForm("EditSubGroupInfo", "SubGroupMaster", FormMethod.Post, new { @id = "SubGroupEdit" }))
+{
+    <div id="myModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                @{Html.RenderPartial("~/Views/MasterViews/SubGroupMaster/_SubGroupEditScreen.cshtml");}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="result"></div>

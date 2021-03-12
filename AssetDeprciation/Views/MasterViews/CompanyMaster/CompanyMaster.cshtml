@@ -1,0 +1,96 @@
+﻿@model AssetDeprciation.Models.MasterModel.Jct_Asset_Dep_Company
+@{
+    ViewBag.Title = "CompanyMaster";
+}
+
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        //---------Jtable---------//
+        $("#DeleteMaster").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            defaultSorting: 'CompanyName ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/CompanyMaster/CompanyList',
+                deleteAction: '/CompanyMaster/CompanyDelete'
+            },
+            fields: {
+                CompanyCode: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                CompanyName: {
+                    title: 'Company Name',
+                    width: '12%'
+                }
+            },
+
+        });
+
+        $('#DeleteMaster').jtable('load');
+        $("#DeleteAllButton").on('click', function () {
+
+            if (confirm("These Selected records will be deleted. Are you sure??")) {
+                var $selectedRows = $('#deleteMaster').jtable('selectedRows');
+                $('#deleteMaster').jtable('deleteRows', $selectedRows);
+            }
+            return false;
+           
+
+        });
+
+        //------------------------//
+        $("#CompanyForm").validate();
+        $("#ComName").rules("add", { required: true, messages: { required: "Enter Company Name" } });
+    });
+
+</script>
+
+    <style > label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+
+    </style >
+
+<br />
+<br />
+<div class="container">
+    @using (Html.BeginForm("CompanyMaster", "CompanyMaster", FormMethod.Post, new { @id="CompanyForm"}))
+    {
+        <h1>Company Master</h1>
+        <table>
+            <tr>
+                <td><label>Company Name</label></td>                
+                <td> @Html.TextBoxFor(x => x.CompanyName, new { @id="ComName"})</td>
+            </tr>
+            <tr>
+
+                <td><input type="Submit"></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <div id="DeleteMaster"></div>
+    }
+</div>

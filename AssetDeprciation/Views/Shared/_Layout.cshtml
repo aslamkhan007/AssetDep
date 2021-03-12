@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/bootstrap-submenu.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-2.2.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap-submenu.min.js"></script>
+    <script src="~/Scripts/modernizr-2.8.3.js"></script>
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('[data-submenu]').submenupicker();
+
+        });
+
+        
+    </script>
+</head>
+<body>
+    
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Asset Depreciation", "Index", "Home", null, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle"><i class="gi gi gi-history sidebar-nav-icon"></i>Master<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="~/CompanyMaster/CompanyMaster">CompanyMaster</a></li>
+                            <li><a href="~/UnitMaster/UnitMaster">UnitMaster</a></li>
+                            <li><a href="~/SubUnitMaster/SubUnitMaster">SubUnitMaster</a></li>
+                            <li><a href="~/SectionMaster/SectionMaster">Section Master</a></li>
+                            <li><a href="~/ShiftMaster/ShiftMaster">Shift Master</a></li>
+                            <li><a href="~/BookMaster/BookMaster">BookMaster</a></li>
+                            <li><a href="~/DepMethodMaster/DepMethodMaster">Depreciation Method</a></li>
+                            <li><a href="~/BookAccountingYearMaster/BookAccountingYearMaster">BookAccountingYear</a></li>
+                            <li><a href="~/GroupMaster/GroupMaster">GroupMaster</a></li>
+                            <li><a href="~/SubGroupMaster/SubGroupMaster">SubGroupMaster</a></li>
+                            <li><a href="~/CompanyActRateMaster/CompanyActRateMaster">CompanyActRateMaster</a></li>
+                            <li><a href="~/ITTaxRateMaster/ITTaxRateMaster">IT Tax Rate Master</a></li>
+                            <li><a href="~/InsuranceMaster/InsuranceMaster">Insurance Master</a></li>
+                            <li><a href="~/Asset/AssetMaster">Entry of Asset</a></li>
+                        </ul>
+                    </li>
+                    @if (User.book != null)
+                    {
+                        <li class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle"><i class="gi gi gi-history sidebar-nav-icon"></i>Transactions<b class="caret"></b></a>
+
+                            <ul class="dropdown-menu">
+
+                                <li><a href="~/AssetAcquisition/AssetAcquisition">Acquisition of Assets</a></li>
+                                @if (User.book.Contains("Com-0"))
+                                {
+                                    <li><a href="~/DepreciationCalculation/DepreciationCalculation">Depreciation calculation As per Company Act</a></li>
+                                }
+                                @if (User.book.Contains("ITB-1"))
+                                {
+                                    <li><a href="~/ITDepreciationCalculation/ITDepreciationCalculation">Depreciation calculation As per IT Act</a></li>
+                                }
+                                <li><a href="~/SLMProspectiveCalculator/SLMProspectiveCalculator">SLM Prospective Depreciation calculation</a></li>
+
+                            </ul>
+
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" data-toggle="dropdown" data-submenu="" class="dropdown-toggle"><i class="gi gi gi-history sidebar-nav-icon"></i>Reports<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                @if(User.book.Contains("Com-0"))
+                                { 
+                                <li class="dropdown-submenu">
+                                    <a href="#" data-submenu="" tabindex="0">CompanyAct Reports</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="~/CompanyActDepreciationReport/YearlyReport/YearlyReport" tabindex="0">Depreciation Report Yearly</a></li>
+                                        <li><a href="~/CompanyActDepreciationReport/MonthlyReport/MonthlyReport" tabindex="0">Depreciation Report Monthly</a></li>
+                                    </ul>
+                                </li>
+                                }
+                                @if(User.book.Contains("ITB-1"))
+                                { 
+                                <li class="dropdown-submenu">
+                                    <a href="#" data-submenu="" tabindex="0">ITAct Reports</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="~/ITActDepreciationReport/YearlyReport/YearlyReport" tabindex="0">Depreciation Report Yearly</a></li>
+                                        <li><a href="~/ITActDepreciationReport/MonthlyReport/MonthlyReport" tabindex="0">Depreciation Report Monthly</a></li>
+                                    </ul>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    <li class="dropdown">
+                        @*<a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">  <i class="fa fa-angle-down"></i> </a>*@
+                        <a href="#" data-toggle="dropdown" class="dropdown-toggle"><i class="gi gi gi-history sidebar-nav-icon"></i>Account<b class="caret"></b></a>
+                        <ul class="dropdown-menu dropdown-custom dropdown-menu-right">
+                            <li class="dropdown-header text-center">Account</li>
+                            <li><a href="~/Authenticate/SignOut"><i class="fa fa-ban fa-fw pull-right"></i> Logout</a> </li>
+                        </ul>
+                    </li>
+
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+</body>
+</html>

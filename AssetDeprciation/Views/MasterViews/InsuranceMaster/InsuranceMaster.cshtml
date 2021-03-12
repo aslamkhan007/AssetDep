@@ -1,0 +1,97 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "InsuranceMaster";
+}
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        //---------Jtable---------//
+        $("#InsuranceMaster").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            defaultSorting: 'Insurance_Name ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/InsuranceMaster/InsuranceList',
+                deleteAction: '/InsuranceMaster/DeleteInsurance'
+            },
+            fields: {
+                Insurance_Code: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                Insurance_Name: {
+                    title: 'Insurance Name',
+                    width: '12%'
+                }
+            },
+
+        });
+
+        $('#InsuranceMaster').jtable('load');
+        $("#InsuranceMaster").on('click', function () {
+
+            if (confirm("These Selected records will be deleted. Are you sure??")) {
+                var $selectedRows = $('#InsuranceMaster').jtable('selectedRows');
+                $('#InsuranceMaster').jtable('deleteRows', $selectedRows);
+            }
+            return false;
+
+
+        });
+
+        //------------------------//
+        $("#InsuranceForm").validate();
+        $("#InsuranceName").rules("add", { required: true, messages: { required: "Enter Insurance Name" } });
+    });
+
+</script>
+
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+
+<div class="container">
+    @using (Html.BeginForm("InsuranceMaster", "InsuranceMaster", FormMethod.Post, new { @id = "InsuranceForm" }))
+    {
+        <h2>InsuranceMaster</h2>
+
+        <table>
+            <tr>
+                <td>Insurance Name</td>
+                <td>
+                    @Html.TextBoxFor(x => x.Jct_Asset_Dep_Insurance.Insurance_Code, new { @id = "InsuranceName" })
+                </td>
+            </tr>
+
+            <tr>
+                <td><input type="Submit" value="Submit"></td>
+                <td></td>
+            </tr>
+
+        </table>
+        <div id="InsuranceMaster"></div>
+
+    }
+</div>

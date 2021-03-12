@@ -1,0 +1,187 @@
+﻿@model AssetDeprciation.Models.SLMProspectiveCalculatorModel
+@{
+    ViewBag.Title = "SLMProspectiveCalculator";
+}
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<script>
+    //-------------------------Custom function fired on click------------//
+    function MyFunction() {
+        var date = moment($("#Put_In_Use").val()).year();
+        var arr = $("#Put_In_Use").val().split('/');
+        var month = arr[0].replace(0,''); //moment($("#Put_In_Use").val()).month();
+        $("#CalculationResult").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: function (postData) {
+                    return $.Deferred(function ($dfd) {
+                        var data = $("#CalculatorForm").serializeArray();
+                        data.push({ name: 'AssetCost', value: $("#AssetCost").val() });
+                        data.push({ name: 'SalvageValue', value: $("#Salvagevalue").val() });
+                        data.push({ name: 'AssetLife', value: $("#AssetLife").val() });
+                        data.push({ name: 'AssetLife_Months', value: $("#AssetLife_Months").val() });
+                        data.push({ name: 'rate', value: $("#DepRate").val() });
+                        data.push({ name: 'Put_In_Use', value: $("#Put_In_Use").val() });
+                        $.ajax({
+                            url: '/SLMProspectiveCalculator/SLMCalculation',
+                            dataType: 'json',
+                            method: 'POST',
+                            data: $.param(data),
+                            success: function (result) {
+                                $dfd.resolve(result);
+                            },
+                            error: function () {
+                                $dfd.reject();
+                            }
+                        });
+                    });
+                }
+            },
+            fields: {
+                currentYear: {
+                    title: 'Year',
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: true,
+                    display: function (postdata)
+                    {
+
+                        if (month < 4)
+                        {
+                            month = moment(date).month(5);
+                            return date;
+                           
+                        }
+                        else
+                        {
+
+                            var te = 1;
+                            if (month > 4) {
+
+                                if (te = 1)
+                                {
+                                    var yrmpdates = moment(($("#Put_In_Use").val()));
+                                    var tempdate = moment(yrmpdates).add(1, 'years');
+                                    var dates = moment(tempdate).add(postdata.record.currentYear, 'years');
+
+                                    var newDate = moment(dates).year();
+                                    return newDate;
+                                    te = 2;
+                                }
+                                else {
+
+                                    var tempdate = moment(($("#Put_In_Use").val()));
+                                    var dates = moment(tempdate).add(postdata.record.currentYear, 'years');
+                                    var newDate = moment(dates).year();
+                                    return newDate;
+                                }
+                            }
+                           
+                            
+                        }
+                        
+                    }
+                },
+                DepreciationExpense: {
+                    title: 'Depreciation Expense',
+                    width: '12%'
+                },
+                AccumulatedDepreciation: {
+                    title: 'Accumulated Depreciation',
+                    width: '12%'
+                },
+                RemainingValue: {
+                    title: 'Net Book Value',
+                    width: '12%',
+                    display:function(postdata)
+                    {
+                        var temp = $("#AssetCost").val();
+                        return parseFloat(temp - postdata.record.AccumulatedDepreciation).toFixed(2);
+                    }
+                }
+            },
+
+        });
+
+        $("#CalculationResult").jtable('load');
+    }
+    //-----------------------------------------------------------------------//
+
+
+</script>
+<script>
+    $(document).ready(function () {
+
+
+       $("#CalculatorForm").submit(function (event) {
+           event.preventDefault();
+       });
+        $("#Put_In_Use").datepicker({
+        });
+        $("#AssetLife").focusout(function () {
+
+            var date = parseFloat($(this).val() * 12);
+            $("#AssetLife_Months").val(Math.round(date, 0));
+
+            var rate = 95 / $(this).val();
+            $("#DepRate").val(rate.toFixed(2));
+        });
+
+        $("#AssetCost").focusout(function () {
+
+            var salvalue = parseFloat($(this).val()*0.05).toFixed(2);
+            $("#Salvagevalue").val(salvalue);
+        });
+    });
+
+</script>
+
+
+<br />
+<br />
+<h2>SLMProspectiveCalculator</h2>
+
+@using (Html.BeginForm("SLMProspectiveCalculator", "SLMProspectiveCalculator", FormMethod.Post, new { @id="CalculatorForm"}))
+{ 
+<table>
+
+    <tr>
+        <td>Asset Cost</td>
+        <td>@Html.TextBoxFor(x => x.AssetCost, new { @id="AssetCost"})</td>
+    </tr>
+    <tr>
+        <td>Salvage value</td>
+        <td>@Html.TextBoxFor(x => x.SalvageValue, new { @id = "Salvagevalue", @readonly = true })</td>
+    </tr>
+    <tr>
+        <td>Asset Life(In Years)</td>
+        <td>@Html.TextBoxFor(x => x.AssetLife, new { @id="AssetLife"})</td>
+        @Html.HiddenFor(x => x.AssetLife_Months, new { @id = "AssetLife_Months" })
+    </tr>
+    <tr>
+        <td>Depreciation  Rate</td>
+        <td>@Html.TextBoxFor(x => x.rate, new { @id = "DepRate", @readonly = true })</td>
+    </tr>
+    <tr>
+        <td>Put to Use Date</td>
+        <td>@Html.TextBoxFor(x => x.Put_In_Use, new { @id = "Put_In_Use" })</td>
+    </tr>
+    <tr>
+        <td><input type="submit" value="Calculate" onclick="MyFunction()"/></td>
+    </tr>
+</table>
+}
+
+
+<div id="CalculationResult"></div>

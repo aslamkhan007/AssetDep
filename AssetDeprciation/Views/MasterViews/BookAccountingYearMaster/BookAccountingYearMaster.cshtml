@@ -1,0 +1,195 @@
+﻿@model AssetDeprciation.ViewModel.ParentViewModel
+@{
+    ViewBag.Title = "BookAccountingYearMaster";
+}
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+    .validation-summary-errors {
+        color: #b94a48;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        var AccClMonths = null;
+
+        function clear() {
+            $("#opnDate").val("");
+            $("#ClosingMonths").val("").prop('readonly', false);
+            $("#AccYear").val("");
+            $("#clsDate").val("");
+
+        };
+        function getclosingDate() {
+            var date = moment(AccClMonths);
+            if (date != "") {
+                var endDate = moment(date).add($("#ClosingMonths").val(), 'months');
+                //alert(endDate);
+                endDate = endDate.subtract(1, 'seconds');
+                alert(endDate)
+                $("#ClosingDate").val(endDate.format('MM/DD/YYYY h:mm:ss a'));
+                $("#clsDate").val(endDate.format('L'));
+                var difference = date;
+                var future = endDate;
+                $("#Days").val(parseInt(future.diff(difference, 'days')));
+                $("#AccYear").val((date.format('YYYY')) + "-" + (endDate.format('YYYY')));
+            }
+        }
+        $("#booklist").change(function () {
+            clear();
+            $.ajax({
+                url: '/BookAccountingYearMaster/getBookOpeningDate',
+                type: 'POST',
+                dataType: 'json',
+                data: { BookCode: $(this).val() },
+                success: function (result) {
+                    var date = moment(result);
+                    AccClMonths = date.format('MM/DD/YYYY h:mm:ss a');
+                    if (AccClMonths == '01/01/0001 5:30:00 am') {
+                        $("#opnDate").val("");
+                    }
+                    else {
+                        var date = moment(AccClMonths);
+                        var opndate = moment(date).add(1, 'seconds');
+                        opndate = opndate.format('L');
+                        $("#opnDate").datepicker('setDate', opndate);
+                        getclosingDate();
+                    }
+                }
+            });
+            if ($("#booklist").val() === "ITB-1") {
+                $("#ClosingMonths").val(12).prop('readonly', true);
+            }
+        });
+
+        $("#opnDate").datepicker({
+            defaultDate:'now',
+            changeYear: true,
+            onClose: function () {
+                AccClMonths = $(this).val();
+                if ($("#booklist").val() === "ITB-1") {
+                    $("#ClosingMonths").val(12).prop('readonly', true);
+                    getclosingDate();
+                }
+            }
+        });
+        $("#ClosingMonths").on("focusout", function () {
+            var date = moment(AccClMonths);
+
+
+            
+            var endDate = moment(date).add($("#ClosingMonths").val(), 'months');
+            endDate = endDate.subtract(1, 'seconds');
+            alert(endDate);
+            $("#ClosingDate").val(endDate.format('MM/DD/YYYY h:mm:ss a'));
+            $("#clsDate").val(endDate.format('L'));
+        
+            var difference = date;
+            var future = endDate;
+            $("#Days").val(parseInt(future.diff(difference, 'days')));
+            $("#AccYear").val((date.format('YYYY')) + "-" + (endDate.format('YYYY')));
+        });
+        $("#DeleteMaster").jtable({
+            paging: true,
+            pageSize: 10,
+
+            sorting: true, //Enable sorting
+            defaultSorting: 'Group_Name ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            deleteConfirmation: function(data) {
+                data.deleteConfirmMessage = 'Are you sure to close this book?';
+                $("#DeleteDialogButton .ui-button-text").html("Close Book");
+            },
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/BookAccountingYearMaster/BookAccountingList',
+                deleteAction: '/BookAccountingYearMaster/DeleteBookAccountingList'
+            },
+            fields: {
+                BookCode: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                Book_Name: {
+                    title: 'Group Name',
+                    width: '12%'
+                }
+            },
+
+        });
+
+        $('#DeleteMaster').jtable('load');
+
+
+
+        $("#BookAccountingForm").validate();
+        $("#booklist").rules("add", { required: true, messages: { required: "Select Book" } });
+        $("#ClosingMonths").rules("add", { required: true, messages: { required: "Enter Number of Months" } });
+    });
+
+</script>
+<br />
+<br />
+<br />
+@using (Html.BeginForm("BookAccountingYearMaster", "BookAccountingYearMaster", FormMethod.Post, new { @id = "BookAccountingForm" }))
+{
+    @Html.ValidationSummary(true)
+    <h1>Book Accounting Year</h1>
+    <table>
+        @Html.HiddenFor(x => x.Jct_Asset_Dep_Book_AccountingYear.AccDays, new { @id = "Days" })
+        <tr>
+            <td>Book</td>
+            <td>
+                @Html.DropDownListFor(x => x.Jct_Asset_Dep_Book.BookCode, Model.DropDownViewModel.BookList, "Select Book", new { @id = "booklist" })
+            </td>
+        </tr>
+
+        <tr>
+            <td>Opening Date</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Book_AccountingYear.AccOpDt, new { @id = "opnDate" })</td>
+        </tr>
+        <tr>
+            <td>Book Closing(Months)</td>
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Book_AccountingYear.AccClMonths, new { @id = "ClosingMonths" })</td>
+        </tr>
+        <tr>
+            <td>Closing Date</td>
+            @Html.HiddenFor(x => x.Jct_Asset_Dep_Book_AccountingYear.ClosingDate, new { @id="ClosingDate"})
+            <td>@Html.TextBoxFor(x => x.Jct_Asset_Dep_Book_AccountingYear.AccClDt, new { @id = "clsDate", @readonly = true })</td>
+        </tr>
+        <tr>
+            <td>Book Accounting Year</td>
+            <td>@Html.TextBoxFor(x => x.FinYear, new { @id = "AccYear", @readonly = true })</td>
+        </tr>
+        <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div id="DeleteMaster"></div>
+}
+

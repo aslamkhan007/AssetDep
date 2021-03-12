@@ -1,0 +1,99 @@
+﻿@model AssetDeprciation.Models.MasterModel.Jct_Asset_Dep_Group
+@{
+    ViewBag.Title = "GroupMaster";
+}
+
+<script src="~/Scripts/jquery-ui.js"></script>
+<link href="~/Content/jquery-ui.css" rel="stylesheet" />
+<script src="~/Scripts/jtable/jquery.jtable.js"></script>
+<link href="~/Scripts/jtable/themes/metro/darkgray/jtable.css" rel="stylesheet" />
+<link href="~/Scripts/jtable/themes/jqueryui/jtable_jqueryui.css" rel="stylesheet" />
+<br />
+<br />
+
+
+
+<script>
+    $(document).ready(function () {
+        //---------Jtable---------//
+        $("#GroupMaster").jtable({
+            paging: true,
+            pageSize: 10,
+            sorting: true, //Enable sorting
+            defaultSorting: 'Group_Name ASC',
+            selecting: true, //Enable selecting
+            selectingCheckboxes: true, //Show checkboxes on first column
+            multiselect: true,
+            //selectOnRowClick: false, //Enable this to only select using checkboxes
+            actions: {
+                listAction: '/GroupMaster/GroupList',
+                deleteAction: '/GroupMaster/DeleteGroupList'
+            },
+            fields: {
+                GroupCode: {
+                    key: true,
+                    create: false,
+                    edit: false,
+                    list: false
+                },
+                Group_Name: {
+                    title: 'Group Name',
+                    width: '12%'
+                }
+            },
+
+        });
+
+        $("#GroupMaster").jtable('load');
+        $("#GroupMaster").on('click', function ()
+        {
+            if (confirm("These Selected Record Will Be Deleted. Are You Sure???"))
+            {
+                var $selectedRows = $('#GroupMaster').jtable('selectedRows');
+                $("#GroupMaster").jtable('deleteRows', $selectedRows);
+            }
+            return false;
+        });
+
+        //------------------------//
+        $("#GroupForm").validate();
+        $("#GroupName").rules("add", { required: true, messages: { required: "Enter Group Name" } });
+    });
+
+</script>
+
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+
+
+
+@using (Html.BeginForm("GroupMaster", "GroupMaster", FormMethod.Post, new { id = "GroupForm"}))
+{ 
+    <h1>Group Master</h1>
+    <table>
+        <tr>
+            <td>Group Name</td>
+            <td>@Html.TextBoxFor(x => x.Group_Name, new { id = "GroupName" })</td>
+        </tr>
+        <tr>
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+        
+    </table>
+
+    <div id="GroupMaster"></div>
+}
+
+

@@ -1,0 +1,42 @@
+﻿@model AssetDeprciation.Models.MasterModel.Jct_Asset_Dep_Book
+@{
+    ViewBag.Title = "BookMaster";
+}
+<style>
+    label.error {
+        color: #b94a48;
+    }
+
+    select.error {
+        border: 1px solid #b94a48;
+    }
+
+    input.error {
+        border: 1px solid #b94a48;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+
+        $("#BookForm").validate();
+        $("#Book").rules("add", { required: true, messages: { required: "Enter Book Name" } });
+    });
+
+</script>
+<br />
+<br />
+@using (Html.BeginForm("BookMaster", "BookMaster", FormMethod.Post, new { @id="BookForm"}))
+{
+    <h1>Book Master</h1>
+    <table>
+        <tr>
+            <td>Book Name</td>
+            <td>@Html.TextBoxFor(x => x.Book_Name, new { @id="Book"})</td>
+        </tr>
+        <tr>
+
+            <td><input type="Submit"></td>
+            <td></td>
+        </tr>
+    </table>
+}
